@@ -1,0 +1,21 @@
+{
+	"/": [],
+	"/OffeneSpiele": [],
+	"/Profil": [],
+	"/Registrierung": [],
+	"/Spielhistorie": [],
+	"/Spiel": [],
+	"/api/login": [
+		"src/routes/api/login/+server.js"
+	],
+	"/api/register": [
+		"src/routes/api/register/+server.js"
+	],
+	"/api/users": [
+		"src/routes/api/users/+server.js"
+	],
+	"/dashboard": [
+		"src/routes/dashboard/+page.js"
+	],
+	"/fehler": []
+}

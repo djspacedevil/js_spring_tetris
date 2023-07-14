@@ -1,0 +1,54 @@
+image: eclipse-temurin:17-jdk
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  before_script:
+    # install dependencies
+    # - apt-get update -y && apt-get install zip unzip openssl -y
+    # Install SDKMAN
+    #- curl -s "https://get.sdkman.io" | bash
+    #- source "/root/.sdkman/bin/sdkman-init.sh"
+    # install temurin java 17
+    #- sdk update
+    #- sdk install java 17.0.5-tem
+    - apt-get update -y && apt-get install openjdk-17-jdk -y 
+
+  script:
+    # Move production properties to classpath
+    - cp $APPLICATION_PROPERTIES server/src/main/resources/application-prod.properties
+    # generate new keypair for jwt encryption
+    - ./generate_keys.sh
+    # run maven build with prod proprties active
+    - ./mvnw clean package -pl server -am -Dactive.profile=prod
+  artifacts:
+    paths:
+      - server/target/tetris-server-1-SNAPSHOT.jar
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  before_script:
+    # install ssh agent
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    # run ssh-agent
+    - eval $(ssh-agent -s)
+    # set appropriate permissions
+    - chmod 600 $PRIVATE_KEY
+    # add private key for deployment
+    - ssh-add $PRIVATE_KEY
+  script:
+    # make target directory
+    - ssh -o StrictHostKeyChecking=no root@192.168.180.103 "mkdir -p /var/www/tetris"
+    # move tetris jar to target directory
+    - scp -o StrictHostKeyChecking=no server/target/tetris-server-1-SNAPSHOT.jar root@192.168.180.103:/var/www/tetris
+    # make jar executable
+    - ssh -o StrictHostKeyChecking=no root@192.168.180.103 "chmod +x /var/www/tetris/tetris-server-1-SNAPSHOT.jar"
+    # restart service
+    - ssh -o StrictHostKeyChecking=no root@192.168.180.103 "systemctl restart tetris.service"
+  dependencies:
+    - build

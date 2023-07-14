@@ -1,0 +1,737 @@
+openapi: 3.0.3
+info:
+  title: Tetris Server - PFW - OpenAPI 3.0
+  description: |
+    Die Beschreibung soll erläutern wie das Interface funktioniert und wie der Client mit dem Server kommunizieren kann. Die Kommunikation erfolgt über REST als auch als Verbindungsupgrade mit Websocket. 
+    
+    Das Interface des Tetris Server ist darauf ausgelegt auf mehreren Wegen mit dem Client zu kommunizieren. Bzw. dem Client werden mehrere Wege geboten.
+
+  contact:
+    url: https://sven-ruddies.de
+  version: 1.0.0
+externalDocs:
+  description: externaldocurl.de
+  url: https://externaldocurl.de/doc
+
+servers:
+  - url: http://localhost
+  - url: ws://localhost
+tags:
+  - name: login
+    description: User login
+    externalDocs:
+      description: Infos about access to Tetris
+      url: https://externaldocurl.de/doc
+  - name: user
+    description: Operations about user
+  - name: game
+    description: Game Interaction
+paths:
+  /api/login:
+    post:
+      tags:
+        - login
+      summary: Login for users via HTTP Basic Auth
+      description: User will login
+      operationId: loginUser
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Credentials are invalid
+      security:
+        - bearerAuth: []
+  /api/users:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      parameters:
+        - in: body
+          name: body
+          description: New User Data
+          schema:
+            $ref: '#/components/schemas/NewUser'
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaken'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInvalid'
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      responses:
+        '204':
+          description: successful operation
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /api/users/{USER_ID}:
+    get:
+      tags:
+        - user
+      summary: user want there informations
+      description: This can only be done by the logged in user.
+      operationId: getUser
+      parameters:
+        - in: path
+          name: userId
+          description: Current UserID
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/ForeignUser'
+                discriminator:
+                  propertyName: userId
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - user
+      summary: Update user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - in: path
+          name: userId
+          description: Current UserID
+          schema:
+            type: integer
+          required: true
+        - in: body
+          name: body
+          description: User Update there data
+          schema:
+            $ref: '#/components/schemas/EditUser'
+      requestBody:
+        description: Update an existent user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditUser'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+        '400':
+          description: Bad Request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaken'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInvalid'
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+  /api/users/{USER_ID}/profile-picture:
+    put:
+      tags:
+        - user
+      summary: Update user picture
+      description: This can only be done by the logged in user.
+      operationId: updateUserPicture
+      parameters:
+        - in: path
+          name: userId
+          description: Current UserID
+          schema:
+            type: integer
+          required: true
+        - in: body
+          name: body
+          description: User Update there data
+          schema:
+            $ref: '#/components/schemas/UserPicture'
+      requestBody:
+        description: Update an existent user picture
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPicture'
+      responses:
+        '202':
+          description: No Content
+        '400':
+          description: Bad Request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '413':
+          description: Payload Too Large
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+  /api/game-histories/user/{USER_ID}:
+    get:
+      tags:
+        - user
+      summary: User can read there own game history
+      description: User can read there own game history
+      operationId: getGameHistory
+      parameters:
+        - in: path
+          name: userId
+          description: Current UserID
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnGameHistory'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+
+  /api/open-games:
+    get:
+      tags:
+        - game
+      summary: User can grab a list of open games
+      description: User can grab a list of open games
+      operationId: getOpenGames
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  open_games:
+                    type: array
+                    items:
+                      type: integer
+                    uniqueItems: true
+                    example: ["<GAME_ID_1>", "<GAME_ID_2>", "..."]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+
+  /api/games/{GAME_ID}:
+    patch:
+      tags:
+        - game
+      summary: User can participate in an open game
+      description: User can participate in an open game
+      operationId: joinOpenGame
+      parameters:
+        - in: path
+          name: gameId
+          description: GameID for join
+          schema:
+            type: integer
+          required: true
+        - in: body
+          name: body
+          description: User Informations for a join
+          schema:
+            $ref: '#/components/schemas/JoinGameUser'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      successful:
+                        type: boolean
+                        example: true
+                  - type: object
+                    properties:
+                      successful:
+                        type: boolean
+                        example: false
+                      reason:
+                        type: string
+                        enum: [Full, Running, Over]
+
+
+        '400':
+          description: Bad Request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+  /api/games:
+    post:
+      tags:
+        - game
+      summary: create a new game
+      description: This can only be done by the logged in user.
+      operationId: createGame
+      parameters:
+        - in: body
+          name: body
+          description: create Game
+          schema:
+            $ref: '#/components/schemas/NewGame'
+      requestBody:
+        description: Create Game object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGame'
+      responses:
+        '200':
+          description: successful create
+          headers:
+            X-Expires-After:
+              description: date in UTC when the game expires without interaction
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game_id:
+                    type: integer
+                    example: 10
+        '400':
+          description: Bad Reques
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+components:
+  schemas:
+    Token:
+      type: string
+      example: '"eyJleHBpcmVzIjoxNjY5ODM5MzA3MDIxLCJpc0V4cGlyZWQiOmZhbHNlLCJkYXRhIjp7InN0YXRlIjoiTlciLCJjb3VudHJ5IjoiREUiLCJjaXR5IjoiS09MTiIsImxhdGl0dWRlIjo1MC45MywibG9uZ2l0dWRlIjo2Ljk1fX0="'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        email:
+          type: string
+          example: john@email.com
+        username:
+          type: string
+          example: Jonny
+        profile_picture:
+          type: string
+          example: http://localhost/img/profile/6a7dd20b72efe531d08e25dc764bbdfc.png
+      discriminator:
+        propertyName: userId
+    ForeignUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: Jonny
+        profile_picture:
+          type: string
+          example: http://localhost/img/profile/6a7dd20b72efe531d08e25dc764bbdfc.png
+      discriminator:
+        propertyName: userId
+
+    NewUser:
+      required:
+        - email
+        - username
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@email.com
+          description: The user email for login
+        username:
+          type: string
+          example: DJSpAcEDeViL
+          description: The username of the user
+        password:
+          type: string
+          example: password123!
+          description: The password for login in clear text
+      xml:
+        name: newUser
+
+    EditUser:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@email.com
+          description: e-mail that can edit
+        username:
+          type: string
+          example: Jonny
+          description: Nick name that can edit
+        password:
+          type: string
+          example: password123!
+          description: password that can edit
+      xml:
+        name: editUser
+    UserTaken:
+      type: object
+      properties:
+        email:
+          type: string
+          example: taken
+        username:
+          type: string
+          example: taken
+    UserInvalid:
+      type: object
+      properties:
+        email:
+          type: string
+          example: invalid
+        username:
+          type: string
+          example: invalid
+    UserLogin:
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+          example: example@example.de
+        password:
+          type: string
+          example: 12345678password!
+      xml:
+        name: userLogin
+    UserSession:
+      required:
+        - id
+        - token
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        token:
+          type: string
+          example: eyJleHBpcmVzIjoxNjY5ODM5MzA3MDIxLCJpc0V4cGlyZWQiOmZhbHNlLCJkYXRhIjp7InN0YXRlIjoiTlciLCJjb3VudHJ5IjoiREUiLCJjaXR5IjoiS09MTiIsImxhdGl0dWRlIjo1MC45MywibG9uZ2l0dWRlIjo2Ljk1fX0=
+    UserPicture:
+      type: object
+      properties:
+        filename:
+          type: string
+          example: myProfilPic.png
+        imageContent:
+          type: string
+          format: binary
+      encoding:
+        imageContent:
+          contentType: image/png, image/jpeg
+    OwnGameHistory:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          user_id:
+            type: integer
+            example: 10
+          score:
+            type: integer
+            example: 11002
+          playDate:
+            type: string
+            format: date-time
+            example: 2022-12-24T17:32:28Z
+          endState:
+            type: string
+            enum: [Won, Lost, Cancelled]
+    JoinGameUser:
+      required:
+        - action
+        - payload
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [add_player]
+          example: add_player
+        payload:
+          required:
+            - client_id
+            - user_id
+          type: object
+          properties:
+            client_id:
+              type: integer
+              example: 1
+            user_id:
+              type: integer
+              example: 10
+    NewGame:
+      required:
+        - owner
+        - owner_client_id
+        - max_players
+      type: object
+      properties:
+        owner:
+          type: integer
+          example: 10
+        owner_client_id:
+          type: integer
+          example: 11
+        max_players:
+          type: integer
+          example: 2
+    Game:
+      type: object
+      properties:
+        userData:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/UserSession'
+        gameData:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/GameData'
+    GameData:
+      type: object
+      properties:
+        players:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/Players'
+    Players:
+      type: object
+      properties:
+        player1:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/Player'
+        player2:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/Player'
+    Player:
+      type: object
+      properties:
+        userID:
+          type: integer
+          example: 10
+        currentScore:
+          type: integer
+        grid:
+          type: string
+          example: '{...}'
+        currentBlock:
+          type: object
+          properties:
+            blockType:
+              type: object
+              properties:
+                schema:
+                  $ref: '#/components/schemas/Block'
+            blockPosition:
+              type: object
+              properties:
+                schema:
+                  $ref: '#/components/schemas/BlockPosition'
+        nextBlock:
+          type: object
+          properties:
+            blockType:
+              type: object
+              properties:
+                schema:
+                  $ref: '#/components/schemas/Block'
+        standingBlocks:
+          type: array
+          items:
+            type: object
+            properties:
+              blockTyp:
+                type: object
+                properties:
+                  schema:
+                    $ref: '#/components/schemas/Block'
+              blockPosition:
+                type: object
+                properties:
+                  schema:
+                    $ref: '#/components/schemas/BlockPosition'
+    Block:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ['L' , 'S' , 'J' , 'I' , 'Z' , 'O' , 'T']
+          example: L
+    BlockPosition:
+      type: object
+      properties:
+        x:
+          type: integer
+          description: Horizontale Axis Coordinate
+        y:
+          type: integer
+          description: Verticale Axis Coordinate
+        rotation:
+          type: integer
+          description: Rotation Degree
+    UserCommandos:
+      type: object
+      properties:
+        userData:
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/UserSession'
+        move:
+          type: string
+          enum: ['W', 'A', 'S', 'D']
+          example: W
+        rotate:
+          type: string
+          example: spacebar
+
+  requestBodies:
+    UserLogin:
+      description: User wil Login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserLogin'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/UserLogin'
+    UserArray:
+      description: List of user object
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      name: Authorization
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter JWT Token for bearer format
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+security:
+  - bearerAuth: []

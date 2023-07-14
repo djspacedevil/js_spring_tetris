@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #0a1018;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hsel.tetrisclient.controller.MainController">
+    <children>
+        <AnchorPane prefHeight="400.0" prefWidth="261.0" style="-fx-background-color: black;">
+            <children>
+                <ImageView fitHeight="400.0" fitWidth="261.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../img/tetris-logo.png" />
+                    </image>
+                </ImageView>
+                <Label layoutX="106.0" layoutY="244.0" text="Gruppe E" textFill="WHITE" />
+                <Label layoutX="88.0" layoutY="350.0" text="© Bild/Icon: Rinor Rama" textFill="WHITE">
+                    <font>
+                        <Font size="8.0" />
+                    </font>
+                </Label>
+            </children></AnchorPane>
+        <AnchorPane prefHeight="400.0" prefWidth="331.0">
+            <children>
+                <ImageView fx:id="userImg" fitHeight="100.0" fitWidth="100.0" layoutX="116.0" layoutY="61.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="116.0" />
+                <Button layoutX="105.0" layoutY="294.0" mnemonicParsing="false" onAction="#onBtnGetHistory" style="-fx-background-color: transparent;" text="[ Historie anzeigen ]" textFill="WHITE" />
+                <Label fx:id="mainTitle" layoutX="115.0" layoutY="252.0" text="Willkommen XXXX!" textFill="WHITE" />
+                <Button layoutX="129.0" layoutY="161.0" mnemonicParsing="false" onAction="#onBtnSetNewImage" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Profilbild ändern" textFill="#5f66c5" underline="true">
+                    <font>
+                        <Font size="10.0" />
+                    </font>
+                    <padding>
+                        <Insets top="20.0" />
+                    </padding></Button>
+                <Button layoutX="118.0" layoutY="321.0" mnemonicParsing="false" onAction="#onBtnPlayGame" style="-fx-background-color: transparent;" text="[ Spiel starten ]" textFill="WHITE" />
+                <Button layoutX="130.0" layoutY="352.0" mnemonicParsing="false" onAction="#onBtnLogoutClick" style="-fx-background-color: transparent; -fx-cursor: hand;" text="[ Logout ]" textFill="WHITE" />
+            </children></AnchorPane>
+    </children>
+</HBox>

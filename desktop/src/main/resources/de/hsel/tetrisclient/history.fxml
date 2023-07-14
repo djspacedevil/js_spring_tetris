@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox style="-fx-background-color: #0a1018;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hsel.tetrisclient.controller.HistoryController">
+    <children>
+        <Label text="Spielehistory" textFill="WHITE">
+            <VBox.margin>
+                <Insets left="40.0" top="30.0" />
+            </VBox.margin>
+            <font>
+                <Font size="22.0" />
+            </font>
+        </Label>
+        <VBox prefHeight="400.0" prefWidth="603.0">
+            <ScrollPane hbarPolicy="NEVER" prefHeight="289.0" prefWidth="537.0">
+                <FlowPane fx:id="historyPane" hgap="10" vgap="10" />
+                <VBox.margin>
+                    <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
+                </VBox.margin>
+                <padding>
+                    <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                </padding>
+            </ScrollPane>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+                <children>
+                    <Button mnemonicParsing="false" onAction="#btnMainScene" style="-fx-background-color: #0074cc; -fx-cursor: hand;" text="Zurück" textFill="WHITE" />
+                </children>
+                <VBox.margin>
+                    <Insets left="40.0" />
+                </VBox.margin>
+            </HBox>
+        </VBox>
+    </children>
+</VBox>

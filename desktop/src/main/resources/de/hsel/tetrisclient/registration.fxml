@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #0a1018;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hsel.tetrisclient.controller.RegistrationController">
+    <children>
+        <AnchorPane prefHeight="400.0" prefWidth="261.0">
+            <children>
+                <ImageView fitHeight="400.0" fitWidth="261.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../img/tetris-logo.png" />
+                    </image>
+                </ImageView>
+                <Label layoutX="106.0" layoutY="244.0" text="Gruppe E" textFill="WHITE" />
+                <Label layoutX="88.0" layoutY="350.0" text="© Bild/Icon: Rinor Rama" textFill="WHITE">
+                    <font>
+                        <Font size="8.0" />
+                    </font>
+                </Label>
+            </children>
+        </AnchorPane>
+        <AnchorPane prefHeight="400.0" prefWidth="341.0">
+            <children>
+                <ImageView fitHeight="75.0" fitWidth="75.0" layoutX="132.0" layoutY="44.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../img/tetris-icon.png" />
+                    </image>
+                </ImageView>
+                <Label fx:id="label_info" alignment="CENTER" contentDisplay="CENTER" layoutX="80.0" layoutY="284.0" prefHeight="33.0" prefWidth="180.0" textAlignment="CENTER" textFill="#ed4956">
+                    <font>
+                        <Font size="10.0" />
+                    </font></Label>
+                <TextField fx:id="tf_email_re" layoutX="94.0" layoutY="150.0" promptText="E-Mail-Adresse" />
+                <TextField fx:id="tf_username_re" layoutX="94.0" layoutY="183.0" promptText="Nutzername" />
+                <PasswordField fx:id="tf_password_re" layoutX="94.0" layoutY="215.0" promptText="Passwort" />
+                <Button layoutX="95.0" layoutY="251.0" mnemonicParsing="false" onAction="#onBtnSignupClick" prefHeight="25.0" prefWidth="149.0" style="-fx-background-color: #0074cc; -fx-cursor: hand;" text="Registrieren" textFill="WHITE" />
+                <Label layoutX="92.0" layoutY="317.0" text="------------ ODER ------------" textFill="#cccccc" />
+                <Label layoutX="94.0" layoutY="349.0" text="Du hast schon ein Konto?" textFill="#cccccc">
+                    <font>
+                        <Font size="10.0" />
+                    </font>
+                </Label>
+                <Button layoutX="205.0" layoutY="345.0" mnemonicParsing="false" onAction="#onBtnLoginClick" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Anmelden" textFill="#5f66c5" underline="true">
+                    <font>
+                        <Font size="10.0" />
+                    </font>
+                </Button>
+            </children>
+        </AnchorPane>
+    </children>
+</HBox>

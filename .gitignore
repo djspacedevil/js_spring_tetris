@@ -1,0 +1,5 @@
+/.idea/
+/server/src/main/resources/certs/
+/web/tetris-web-client.iml
+/server/src/main/resources/application-local.properties
+node_modules/
